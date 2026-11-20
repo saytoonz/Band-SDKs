@@ -6,7 +6,7 @@
 2. Decompiled each base with JADX 1.5.6 using `jadx --no-res -j 3 -d <output> <base.apk>`. Searched all three DEX files for class descriptors in parallel with decompilation. A DEX string can establish that a symbol exists. Method behavior and callers require stronger evidence from decompilation or bytecode.
 3. Ran `adb devices -l`. No Android device was attached. No application install, GATT connection, measurement or packet capture was performed.
 
-The repository tracks source citations, observations and decisions. The local APK archives, generated decompiler output and packet captures stay outside Git. Keep independent findings for each app and require device evidence before enabling any wire behavior in Dart. Original codecs should be based on documented field semantics and use sanitized captures or clearly labeled synthetic fixtures. Use fixtures to cover truncation, repeated or missing fragments, unsupported capabilities and reported time boundaries where applicable.
+The repository tracks source citations, observations and decisions. The local APK archives, generated decompiler output and packet captures stay outside Git. Keep independent findings for each app and require device evidence before enabling live transmission from an application. Original codecs should be based on documented field semantics and use sanitized captures or clearly labeled synthetic fixtures. Use fixtures to cover truncation, repeated or missing fragments, unsupported capabilities and reported time boundaries where applicable.
 
 ## Reproducing static inspection
 
@@ -38,3 +38,11 @@ done
 ## Static inspection limits
 
 JADX produced source trees but reported 31 errors for HBand and 144 for GBand. The report relies on visible method bodies and named references. Recheck any ambiguous control flow against DEX disassembly before turning it into a wire specification. The GBand analysis found SDK-internal callers for PPG and RR and no app-screen entry point in the searched call sites. HBand's RR recognition remains unresolved because the parser has no located caller and its first byte also identifies GPS in the generic dispatcher.
+
+## Phase 2 offline investigation
+
+- No compatible Veepoo hardware is available. Apple Watch Series 8 and WHOOP 4.0 were excluded from this study.
+- Cross-checked the GBand handlers against Android Build Tools `dexdump` for the original, hashed APK, including an instruction-order discrepancy in JADX around the `A1` lane length. Both lane lengths are LE. The [wire report](gband-wire.md) records method descriptors, code item addresses and verified instructions.
+- Traced model and feature gates and compared the bundled SDK symbols with Veepoo's public JH58 documentation. The [compatibility inventory](device-compatibility.md) separates an APK behavior, a project candidate and a retail pairing lead.
+- Chose block-scoped, transport-independent codecs that handle reordering within one block, preserve uncalibrated signals and expose inert write packets. CRC, RR unit conversion and live optical decoding remain open. No compatible watch was used for the tests.
+- Ran `dart analyze` and `dart test` with Dart 3.13.7. The analyzer reported no issues and all seven synthetic fixture tests passed.

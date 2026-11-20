@@ -4,3 +4,6 @@
 *.pcap
 *.pcapng
 btsnoop*.log
+
+.dart_tool/
+packages/wearable_protocol/pubspec.lock
