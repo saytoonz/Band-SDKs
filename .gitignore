@@ -1,0 +1,6 @@
+.DS_Store
+*.apk
+*.apks
+*.pcap
+*.pcapng
+btsnoop*.log
