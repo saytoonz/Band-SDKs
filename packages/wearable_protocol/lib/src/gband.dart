@@ -59,6 +59,7 @@ List<int> _notification(BlePacket packet, int opcode, int minLength) {
 final class _FragmentSet {
   final _fragments = <int, List<int>>{};
   int? _last;
+  int _bufferedBytes = 0;
 
   bool add(int index, int last, List<int> bytes) {
     if (index > last || (_last != null && _last != last)) {
@@ -73,7 +74,12 @@ final class _FragmentSet {
       }
       return false;
     }
+    // Local resource ceilings, independent of the wearable's fragment fields.
+    if (last >= 4096 || _bufferedBytes + bytes.length > 1024 * 1024) {
+      throw const FormatException('Block exceeds decoder resource limits');
+    }
     _last = last;
+    _bufferedBytes += bytes.length;
     _fragments[index] = bytes;
     return _fragments.length == last + 1;
   }
@@ -83,6 +89,7 @@ final class _FragmentSet {
 
   void clear() {
     _last = null;
+    _bufferedBytes = 0;
     _fragments.clear();
   }
 }
@@ -188,6 +195,7 @@ final class StoredPpgAssembler {
         records: _decodePpgRecords(payload),
       );
     } on FormatException {
+      reset();
       _failed = true;
       rethrow;
     }
@@ -307,29 +315,55 @@ final class RrAssembler {
       _total = total;
       if (!complete) return null;
       final header = _fragments[0];
-      final data = <int>[
-        ...header.skip(16),
-        for (var i = 1; i <= _fragments.last; i++) ..._fragments[i].skip(7),
-      ];
       final count = _u16(header, 14);
+      final time = _rrCalendar(header);
+      final data = _rrOctets(header, _fragments).take(count).toList();
       if (data.length < count) throw const FormatException('Truncated RR data');
       return RrBlock._(
         index,
         total,
         header[7],
-        DeviceCalendarTime(
-          year: 2000 + header[8],
-          month: header[9],
-          day: header[10],
-          hour: header[11],
-          minute: header[12],
-          second: header[13],
-        ),
-        data.sublist(0, count),
+        time,
+        data,
       );
     } on FormatException {
+      reset();
       _failed = true;
       rethrow;
     }
   }
+}
+
+Iterable<int> _rrOctets(List<int> header, _FragmentSet fragments) sync* {
+  yield* header.skip(16);
+  for (var i = 1; i <= fragments.last; i++) {
+    yield* fragments[i].skip(7);
+  }
+}
+
+DeviceCalendarTime _rrCalendar(List<int> header) {
+  final year = 2000 + header[8];
+  final month = header[9];
+  final day = header[10];
+  final hour = header[11];
+  final minute = header[12];
+  final second = header[13];
+  final date = DateTime.utc(year, month, day, hour, minute, second);
+  if (date.year != year ||
+      date.month != month ||
+      date.day != day ||
+      date.hour != hour ||
+      date.minute != minute ||
+      date.second != second) {
+    throw const FormatException('Invalid RR device calendar fields');
+  }
+  // UTC is only used for calendar validation, not as a device time zone.
+  return DeviceCalendarTime(
+    year: year,
+    month: month,
+    day: day,
+    hour: hour,
+    minute: minute,
+    second: second,
+  );
 }

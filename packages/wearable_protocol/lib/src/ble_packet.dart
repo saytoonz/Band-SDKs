@@ -10,7 +10,7 @@ final class BlePacket {
     required Iterable<int> bytes,
     this.hostReceiptTime,
   })  : characteristic = characteristic.toLowerCase(),
-        bytes = List.unmodifiable(bytes) {
+        bytes = List.unmodifiable(bytes.take(513)) {
     if (this.bytes.length > 512 ||
         this.bytes.any((byte) => byte < 0 || byte > 255)) {
       throw const FormatException('Invalid GATT characteristic value');

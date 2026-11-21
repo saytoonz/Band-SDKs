@@ -27,3 +27,17 @@ All values in [the tests](test/codec_test.dart) were constructed offline. They d
 ## Offline transcript replay
 
 The [stored PPG transcript tests](test/transcript_test.dart) replay labelled connections, GATT writes and notifications through the real assembler. On reconnect, the fixture starts a fresh read, drops pending fragments from the old connection and ignores its late notifications. Replay also checks for the expected acknowledgment after a completed block while the connection is open. The harness lives in test support and performs no BLE I/O. To add a device fixture, preserve packet order, connection boundaries and characteristic UUIDs, replace identifying bytes where safe, and record the wearable model, firmware and APK hash.
+
+## Stored PPG transfer manager
+
+Subscribe to `StoredPpgTransfer.events` before calling `start`. Create a new `StoredPpgConnection` with `openConnection` after the transport has established an authorized connection and subscribed to the primary characteristic. Capture that token in the notification and disconnect callbacks for that link. Use a fresh link for each transfer so delayed frames from an interrupted read cannot be attributed to a later read on the same link.
+
+Dispatch a `StoredPpgWrite` only while `isPending(write)` is true. Report success or failure using `writeResult` with the same event object. A successful result means the transport reported its write complete. It carries no independent confirmation from the wearable. The manager emits progress after each block acknowledgment write result and reports completion after the final one. Consumers can persist progress blocks as they arrive. The manager retains only the current block and a bounded queue of notifications arriving before its write result. Call `disconnect` when the link closes and `dispose` when the manager is no longer needed.
+
+The session manager treats a zero count as an empty result and restricts nonzero counts to the positive signed-byte range read by the APK. It expects contiguous zero-based block indices and a header before continuations. Within an identified block, continuations can arrive out of order. An old connection token is ignored, and continuations received between blocks before a new header are discarded. A delayed continuation arriving after a new header has no wire identifier to distinguish it from the current block.
+
+The configurable defaults are 10 seconds per outstanding write and 30 seconds to receive the initial count or complete a block. Duplicate and partial notifications do not extend a deadline. Cancellation is local and discards pending state and write receipts. Device stop, malformed data, a failed write and timeouts each produce an explicit terminal event. The manager generates no automatic retry, resume or cancellation command.
+
+## Parser limits
+
+Characteristic values are bounded at 512 bytes. The codec caps each block at 4,096 fragments and 1 MiB of retained wire bytes, and the transfer manager buffers at most 256 notifications while a write result is pending. These are local resource controls. The limits do not describe a wearable's supported sizes. RR assembly copies at most the declared octet count and rejects impossible calendar dates and clock fields. Date validation leaves the device UTC offset unknown. PPG Unix seconds retain signed 32-bit semantics. Truncated frames and excessive resources fail without manufacturing samples.

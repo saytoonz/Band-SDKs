@@ -51,3 +51,8 @@ JADX produced source trees but reported 31 errors for HBand and 144 for GBand. T
 
 - Added an offline stored PPG transcript checker in Dart test support. Synthetic coverage exercises request and acknowledgment matching, partial block loss on disconnect, a fresh request on reconnect and stale notifications from an earlier connection. A separate test checks that ending an open transcript before its required acknowledgment fails.
 - The transcript models reconnect as a new request. Firmware-specific resume behavior and real device replay remain open.
+
+## Stored PPG session milestone
+
+- The bytecode review confirmed the live callback's signed promotion and bit-19 conversion, and found that its length guard bounds sample starts without establishing a trailer. The [wire report](gband-wire.md#live-path-bytecode-review) records code item addresses and unresolved framing. The package still decodes stored PPG only.
+- Synthetic session tests cover multi-block completion, early notification callbacks, duplicates, dropped fragments, conflicting and truncated data, stale tokens and receipts, cancellation, disconnect, device stop, write failures and timeouts. The parser tests also exercise signed timestamps, leap-day validation and resource limits. No hardware results were collected. Apple Watch Series 8 and WHOOP 4.0 remain outside the Veepoo test matrix.
