@@ -23,3 +23,7 @@ All values in [the tests](test/codec_test.dart) were constructed offline. They d
 - Stored PPG has a header with timestamp `0x12345678`, raw index 3 and arbitrary CRC field `0xBEEF`. Two continuations split one `A0/A1/A2` record across a green sample. The green lane starts with an unsigned high-bit sample and the missing marker. The motion lane starts with −1, −32768 and 32767. The remaining slots use zeros. Tests reverse arrival order, repeat fragments, truncate a header and truncate a record.
 - RR uses block 2 of 5 and a clock with no time zone. Two fragments carry seven declared unsigned octets plus synthetic surplus zeros. Tests cover reverse order, duplicate fragments, conflicting duplicates, different block IDs, insufficient payload and the zero-block code.
 - Command tests cover byte order, fixed lengths, the stored PPG block acknowledgment, and range validation for the RR cursor.
+
+## Offline transcript replay
+
+The [stored PPG transcript tests](test/transcript_test.dart) replay labelled connections, GATT writes and notifications through the real assembler. On reconnect, the fixture starts a fresh read, drops pending fragments from the old connection and ignores its late notifications. Replay also checks for the expected acknowledgment after a completed block while the connection is open. The harness lives in test support and performs no BLE I/O. To add a device fixture, preserve packet order, connection boundaries and characteristic UUIDs, replace identifying bytes where safe, and record the wearable model, firmware and APK hash.

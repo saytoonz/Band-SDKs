@@ -46,3 +46,8 @@ JADX produced source trees but reported 31 errors for HBand and 144 for GBand. T
 - Traced model and feature gates and compared the bundled SDK symbols with Veepoo's public JH58 documentation. The [compatibility inventory](device-compatibility.md) separates an APK behavior, a project candidate and a retail pairing lead.
 - Chose block-scoped, transport-independent codecs that handle reordering within one block, preserve uncalibrated signals and expose inert write packets. CRC, RR unit conversion and live optical decoding remain open. No compatible watch was used for the tests.
 - Ran `dart analyze` and `dart test` with Dart 3.13.7. The analyzer reported no issues and all seven synthetic fixture tests passed.
+
+## Replay milestone
+
+- Added an offline stored PPG transcript checker in Dart test support. Synthetic coverage exercises request and acknowledgment matching, partial block loss on disconnect, a fresh request on reconnect and stale notifications from an earlier connection. A separate test checks that ending an open transcript before its required acknowledgment fails.
+- The transcript models reconnect as a new request. Firmware-specific resume behavior and real device replay remain open.
