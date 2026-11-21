@@ -8,3 +8,4 @@ This repository tracks independent BLE integration research for the supplied HBa
 - [Device compatibility and hardware validation plan](docs/device-compatibility.md)
 - [GBand wire formats and DEX evidence](docs/gband-wire.md)
 - [Standalone Dart codecs, data contract and fixtures](packages/wearable_protocol/README.md)
+- [Independent BLE transport and synthetic peripheral](docs/ble-transport.md)

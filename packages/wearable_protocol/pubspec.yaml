@@ -1,5 +1,5 @@
 name: thrivnme_wearable_protocol
-description: Transport-independent wearable data models and GBand packet codecs.
+description: Independent BLE transport interfaces, wearable data models and GBand codecs.
 version: 0.1.0
 publish_to: none
 environment:

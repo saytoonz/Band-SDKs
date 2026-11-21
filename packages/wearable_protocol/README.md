@@ -41,3 +41,7 @@ The configurable defaults are 10 seconds per outstanding write and 30 seconds to
 ## Parser limits
 
 Characteristic values are bounded at 512 bytes. The codec caps each block at 4,096 fragments and 1 MiB of retained wire bytes, and the transfer manager buffers at most 256 notifications while a write result is pending. These are local resource controls. The limits do not describe a wearable's supported sizes. RR assembly copies at most the declared octet count and rejects impossible calendar dates and clock fields. Date validation leaves the device UTC offset unknown. PPG Unix seconds retain signed 32-bit semantics. Truncated frames and excessive resources fail without manufacturing samples.
+
+## BLE transport integration
+
+Use `BleTransport`, `BleLink` and `BleNotifications` to supply platform I/O. The `GBandCoordinator` verifies GATT properties and runs the supplied `GBandAuthorizer` before returning a session. The [architecture and test driver guide](../../docs/ble-transport.md) describes lifecycle, error handling and eventual device validation.

@@ -62,3 +62,9 @@ JADX produced source trees but reported 31 errors for HBand and 144 for GBand. T
 - Verified implementation commit `3e3aa0705aacfce885c26d2785f8274c1902d273` on macOS 26.5.2 (25F84), arm64, using Dart SDK 3.13.7 stable.
 - `dart analyze` exited 0 with no issues. `dart test --reporter expanded` exited 0 with 28 passing tests and zero failures. Both commands ran from the Dart package directory.
 - An earlier working-tree run failed because the synthetic queue-limit fixture encoded a fragment index above 255 as a single octet. The corrected fixture uses a two-byte LE index and verified the intended queue limit.
+
+## Phase 3 independent transport
+
+- Added the BLE transport contracts, GBand connection and binding boundary, stored PPG routing, and a scripted synthetic peripheral. A write-with-response characteristic and one stored PPG read per link are adapter requirements. Hardware support for those choices still needs a capture.
+- Ran the analyzer and full suite on the local Mac using Dart 3.13.7 stable. The analyzer reported no issues. All 48 tests passed, including 20 new synthetic transport integration tests.
+- No physical Veepoo device was used. The next verification is a platform transport against a compatible device using its normal user-authorized binding flow.
