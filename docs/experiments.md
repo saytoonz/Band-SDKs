@@ -56,3 +56,9 @@ JADX produced source trees but reported 31 errors for HBand and 144 for GBand. T
 
 - The bytecode review confirmed the live callback's signed promotion and bit-19 conversion, and found that its length guard bounds sample starts without establishing a trailer. The [wire report](gband-wire.md#live-path-bytecode-review) records code item addresses and unresolved framing. The package still decodes stored PPG only.
 - Synthetic session tests cover multi-block completion, early notification callbacks, duplicates, dropped fragments, conflicting and truncated data, stale tokens and receipts, cancellation, disconnect, device stop, write failures and timeouts. The parser tests also exercise signed timestamps, leap-day validation and resource limits. No hardware results were collected. Apple Watch Series 8 and WHOOP 4.0 remain outside the Veepoo test matrix.
+
+### Mac verification
+
+- Verified implementation commit `3e3aa0705aacfce885c26d2785f8274c1902d273` on macOS 26.5.2 (25F84), arm64, using Dart SDK 3.13.7 stable.
+- `dart analyze` exited 0 with no issues. `dart test --reporter expanded` exited 0 with 28 passing tests and zero failures. Both commands ran from the Dart package directory.
+- An earlier working-tree run failed because the synthetic queue-limit fixture encoded a fragment index above 255 as a single octet. The corrected fixture uses a two-byte LE index and verified the intended queue limit.
